@@ -1,0 +1,2 @@
+import ToolCard from "./ToolCard";
+export default function ToolGrid({items}){if(!items.length)return <div className="empty-state"><div className="empty-icon">✦</div><h3>No tools found</h3><p>Try changing your search or filters.</p></div>;return <div className="tool-grid">{items.map(t=><ToolCard key={t.id} tool={t}/>)}</div>}

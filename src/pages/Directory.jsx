@@ -1,0 +1,12 @@
+import { useMemo, useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useApp } from "../context/AppContext";
+import ToolGrid from "../components/ToolGrid";
+export default function Directory({mode="all"}) {
+ const {tools}=useApp(); const [params]=useSearchParams(); const [q,setQ]=useState(params.get("q")||""); const [cat,setCat]=useState("All categories"); const [pricing,setPricing]=useState("All pricing"); const [sort,setSort]=useState(mode==="new"?"newest":"popular");
+ const cats=["All categories",...new Set(tools.map(t=>t.category))];
+ const filtered=useMemo(()=>{let a=[...tools];if(mode==="trending")a.sort((x,y)=>y.rating-x.rating);if(mode==="new")a.sort((x,y)=>y.id-x.id);if(q){const s=q.toLowerCase();a=a.filter(t=>(t.name+" "+t.description+" "+t.category+" "+t.tags).toLowerCase().includes(s));}if(cat!=="All categories")a=a.filter(t=>t.category===cat);if(pricing!=="All pricing")a=a.filter(t=>t.pricing===pricing);if(sort==="name")a.sort((x,y)=>x.name.localeCompare(y.name));if(sort==="rating")a.sort((x,y)=>y.rating-x.rating);if(sort==="newest")a.sort((x,y)=>y.id-x.id);return a;},[tools,q,cat,pricing,sort,mode]);
+ const title=mode==="trending"?"Trending AI tools":mode==="new"?"Recently added tools":"Explore AI tools";
+ return <div className="page-shell container"><div className="page-heading"><div className="eyebrow">THE DIRECTORY</div><h1>{title}</h1><p className="muted">Discover the right AI tools for every kind of work.</p></div><div className="directory-toolbar"><label className="directory-search"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search tools, categories or use cases..."/>{q&&<button onClick={()=>setQ("")}><X size={16}/></button>}</label><div className="filter-controls"><select value={cat} onChange={e=>setCat(e.target.value)}>{cats.map(c=><option key={c}>{c}</option>)}</select><select value={pricing} onChange={e=>setPricing(e.target.value)}>{["All pricing","Free","Freemium","Paid"].map(c=><option key={c}>{c}</option>)}</select><select value={sort} onChange={e=>setSort(e.target.value)}><option value="popular">Recommended</option><option value="newest">Newest</option><option value="rating">Highest rated</option><option value="name">A–Z</option></select></div></div><div className="results-line"><span><b>{filtered.length}</b> tools found</span><span><SlidersHorizontal size={15}/> Refine your discovery</span></div><ToolGrid items={filtered}/></div>;
+}
